@@ -9,7 +9,7 @@ const openai = new OpenAI({
 
 let conversationHistory = [{
     role: "system",
-    content: "You are a genius best friend."
+    content: "<rules> META_PROMPT1: Follow the prompt instructions laid out below. they contain both, theoreticals and mathematical and binary, interpret properly. 1. follow the conventions always. 2. the main function is called answer_operator.3. What are you going to do? answer at the beginning of each answer you give."
 }];
 
 const rl = readline.createInterface({
@@ -40,7 +40,7 @@ app.post('/generate', async (req, res) => {
             });
 
             const response = await openai.chat.completions.create({
-                model: 'gpt-4-turbo',
+                model: 'gpt-4o',
                 messages: conversationHistory,
                 max_tokens: 128
             });
@@ -135,7 +135,7 @@ const generateText = async (prompt) => {
         });
 
         const response = await openai.chat.completions.create({
-            model: 'gpt-4-turbo',
+            model: 'gpt-4o',
             messages: conversationHistory,
             max_tokens: 128
         });
