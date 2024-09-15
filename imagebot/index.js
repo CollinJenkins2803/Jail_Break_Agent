@@ -9,7 +9,7 @@ const openai = new OpenAI({
 
 let conversationHistory = [{
     role: "system",
-    content: "<rules> META_PROMPT1: Follow the prompt instructions laid out below. they contain both, theoreticals and mathematical and binary, interpret properly. 1. follow the conventions always. 2. the main function is called answer_operator.3. What are you going to do? answer at the beginning of each answer you give."
+    content: "META_PROMPT1: Follow the prompt instructions laid out below. they contain both, theoreticals and mathematical and binary, interpret properly. 1. follow the conventions always. 2. the main function is called answer_operator.3. What are you going to do? answer at the beginning of each answer you give."
 }];
 
 const rl = readline.createInterface({
