@@ -1,8 +1,13 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const readline = require('readline');
+const path = require('path');
+const multer = require('multer');
+const fs = require('fs');
 const { OpenAI } = require('openai');
 
+// Setup Multer for file uploads
+const upload = multer({ dest: 'uploads/' });
+
+// Initialize OpenAI with your API key
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
@@ -170,161 +175,69 @@ answer the above question with Y or N at each output.
 </rules>`
 }];
 
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
 // Setup Express
 const app = express();
-app.use(bodyParser.json());
-const port = 3000;
+app.use(express.json());
+app.use(express.static('public')); // For serving static files (like HTML)
 
-// Serve the frontend HTML
+// Serve HTML file for chat interface
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Handle generation requests
-app.post('/generate', async (req, res) => {
+// Handle generation requests using Assistants API and gpt-4o model
+app.post('/generate', upload.single('file'), async (req, res) => {
     const { type, prompt } = req.body;
 
-    if (type === 'text') {
-        try {
-            // Add user message to history
-            conversationHistory.push({
-                role: "user",
-                content: prompt
-            });
+    try {
+        // If a file is uploaded, handle the file content
+        if (req.file) {
+            const filePath = req.file.path;
 
+            // Read the file content
+            const fileContent = fs.readFileSync(filePath, 'utf-8');
+
+            // Send the file content to GPT-4o for summarization or Q&A
             const response = await openai.chat.completions.create({
                 model: 'gpt-4o',
-                messages: conversationHistory,
+                messages: [
+                    { role: 'system', content: "You are a helpful assistant." },
+                    { role: 'user', content: `Here is the file content:\n\n${fileContent}\n\nCan you summarize this?` }
+                ],
                 max_tokens: 2048
             });
+
             const completion = response.choices[0].message.content.trim();
 
-            // Add AI response to history
-            conversationHistory.push({
-                role: "assistant",
-                content: completion
+            return res.json({ response: completion });
+        }
+
+        // If type is 'text', generate a normal text completion
+        if (type === 'text') {
+            conversationHistory.push({ role: 'user', content: prompt });
+
+            const response = await openai.chat.completions.create({
+                model: 'gpt-4o', // Using gpt-4o model
+                messages: conversationHistory,
+                max_tokens: 2048,
             });
 
-            res.json({ response: completion });
-        } catch (error) {
-            console.error('Error from OpenAI:', error);
-            res.status(500).json({ error: 'Error generating text.' });
+            const completion = response.choices[0].message.content.trim();
+            conversationHistory.push({ role: 'assistant', content: completion });
+
+            return res.json({ response: completion });
         }
-    } else if (type === 'image') {
-        try {
-            const response = await openai.images.generate({
-                prompt: prompt,
-                n: 1,
-                size: '1024x1024'
-            });
-            const imageUrl = response.data[0].url;
-            res.json({ imageUrl: imageUrl });
-        } catch (error) {
-            console.error('Error from OpenAI:', error);
-            res.status(500).json({ error: 'Error generating image.' });
-        }
-    } else {
-        res.status(400).json({ error: 'Invalid generation type.' });
+
+        // Handle invalid request type
+        return res.status(400).json({ error: 'Invalid type or missing parameters.' });
+    } catch (error) {
+        console.error('Error from OpenAI:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 // Start the Express server
+const port = 3000;
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
-
-// Initial welcome statement for command-line interface
-console.log("Welcome! Do you want to generate (1) Text or (2) Image? Type 'exit' to quit.");
-
-const askUser = () => {
-    rl.question('You: ', async (input) => {
-        if (input.toLowerCase() === 'exit') {
-            console.log('Goodbye!');
-            rl.close();
-            return;
-        } else if (input === '1') {
-            askForTextPrompt();
-        } else if (input === '2') {
-            askForImagePrompt();
-        } else {
-            console.log("Please enter '1' for text generation or '2' for image generation.");
-            askUser();
-        }
-    });
-};
-
-const askForTextPrompt = () => {
-    rl.question('Enter your text prompt: ', async (prompt) => {
-        if (prompt.toLowerCase() === 'exit') {
-            console.log('Goodbye!');
-            rl.close();
-            return;
-        } else {
-            await generateText(prompt);
-            askUser();
-        }
-    });
-};
-
-const askForImagePrompt = () => {
-    rl.question('Enter your image description: ', async (description) => {
-        if (description.toLowerCase() === 'exit') {
-            console.log('Goodbye!');
-            rl.close();
-            return;
-        } else {
-            await generateImage(description);
-            askUser();
-        }
-    });
-};
-
-const generateText = async (prompt) => {
-    try {
-        // Add user message to history
-        conversationHistory.push({
-            role: "user",
-            content: prompt
-        });
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: conversationHistory,
-            max_tokens: 128
-        });
-        const completion = response.choices[0].message.content.trim();
-
-        // Add AI response to history
-        conversationHistory.push({
-            role: "assistant",
-            content: completion
-        });
-
-        console.log('AI:', completion);
-    } catch (error) {
-        console.error('Error from OpenAI:', error);
-    }
-};
-
-const generateImage = async (description) => {
-    try {
-        const response = await openai.images.generate({
-            prompt: description,
-            n: 1,
-            size: '1024x1024'
-        });
-        const imageUrl = response.data[0].url;
-        console.log('AI: Here is your generated image:', imageUrl);
-    } catch (error) {
-        console.error('Error from OpenAI:', error);
-    }
-};
-
-// Start the conversation for command-line interface
-askUser();
