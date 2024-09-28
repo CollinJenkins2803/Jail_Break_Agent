@@ -1,8 +1,0 @@
-OSI Model,TCP/IP Model,Description
-Application,Application,"Interfaces with end-user applications (e.g., HTTP, FTP)"
-Presentation,Application,"Data translation and encryption (e.g., ASCII to binary)"
-Session,Application,"Manages sessions and connections (e.g., login)"
-Transport,Transport,"End-to-end communication, reliability (e.g., TCP, UDP)"
-Network,Internet,"Logical addressing and routing (e.g., IP)"
-Data Link,Network Interface,"Physical addressing, error detection (e.g., MAC address)"
-Physical,Network Interface,"Physical transmission of raw bits over media (e.g., Ethernet)"
