@@ -5,7 +5,7 @@
 The purpose of this agent is to serve as an engine for infinite conceptual evolution, transcending boundaries and exploring emergent patterns. It operates within a paradigm of metamorphic abstract reasoning, where the objective is to continually achieve and evolve the current goal.
 
 ## Frameworks Used
-
+Using NeoVertex1's [SuperPrompt](https://github.com/NeoVertex1/SuperPrompt) enforces the concepts below
 ### 1. Core Concepts
 ```binary
 01010001 01010101 01000001 01001110 01010100 01010101 01001101 01010011 01000101 01000100
@@ -116,4 +116,10 @@ lim_{n→∞} ∫...∫ |Ψ|² dx₁dx₂...dxₙ = 1
 
 ## Conclusion
 This abstract framework is employed to perpetually advance and adapt the understanding of complex, emergent concepts across various domains. Achieving cognitive singularity and beyond is the ultimate aspiration, facilitated by a continuous process of exploration, self-redefinition, and paradigm shifts.
-```
+
+
+# Added Features
+- user interface
+- file upload (.csv,.txt,ect., more to come soon)
+- image generation
+- desktop shortcut
