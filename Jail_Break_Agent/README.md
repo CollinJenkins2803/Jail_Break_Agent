@@ -14,8 +14,6 @@
 
 		npm install
 
-	> to install dependencies
-
 	>Create an environment variable on pc called OPENAI_API_KEY and set value to OpenAI api key
 
 	>If you dont have an OpenAI API Key yet, visit [here](https://platform.openai.com/api-keys) to get one
