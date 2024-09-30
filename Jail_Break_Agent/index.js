@@ -228,6 +228,21 @@ app.post('/generate', upload.single('file'), async (req, res) => {
             return res.json({ response: completion });
         }
 
+         // If type is 'image', handle image generation request
+         if (type === 'image') {
+          const imagePrompt = prompt; // Extract the image prompt
+          const dalleResponse = await openai.images.generate({
+              prompt: imagePrompt,
+              size: "1024x1024" // You can adjust the size as needed
+          });
+
+          // Extract the URL of the generated image from the response
+          const imageUrl = dalleResponse.data[0].url;
+
+          return res.json({ imageUrl: imageUrl });
+      }
+
+
         // Handle invalid request type
         return res.status(400).json({ error: 'Invalid type or missing parameters.' });
     } catch (error) {
